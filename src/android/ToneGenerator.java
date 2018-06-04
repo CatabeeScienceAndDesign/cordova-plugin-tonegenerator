@@ -28,12 +28,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 
 public class ToneGenerator extends CordovaPlugin  {
+
+    private static final String TAG = "ToneGenerator";
 
     public static int STOPPED = 0;
     public static int RUNNING = 1;
@@ -108,11 +112,22 @@ public class ToneGenerator extends CordovaPlugin  {
                             AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_16BIT);
                     // create an audiotrack object
-                    AudioTrack audioTrack = new AudioTrack(
-                            AudioManager.STREAM_MUSIC, sampleRate,
-                            AudioFormat.CHANNEL_OUT_MONO,
-                            AudioFormat.ENCODING_PCM_16BIT, buffsize,
-                            AudioTrack.MODE_STREAM);
+                    Log.d(TAG, "Buffer Size: " + Integer.toString(buffsize));
+                    AudioAttributes attributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_GAME)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build();
+                    AudioFormat format = new AudioFormat.Builder()
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setSampleRate(sampleRate)
+                        .build();
+                    AudioTrack audioTrack = new AudioTrack.Builder()
+                        .setAudioAttributes(attributes)
+                        .setAudioFormat(format)
+                        .setBufferSizeInBytes(buffsize)
+                        .setTransferMode(AudioTrack.MODE_STREAM)
+                        .build();
 
                     short samples[] = new short[buffsize];
                     double twopi = 8. * Math.atan(1.);
