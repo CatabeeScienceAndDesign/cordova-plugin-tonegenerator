@@ -1,15 +1,18 @@
-![Apache Cordova Tone Generator Plugin](https://raw.githubusercontent.com/sdesalas/cordova-plugin-tonegenerator/master/image.jpg)
+---
+title: Tone Generator
+description: Play a tone at specified frequency and volume
+---
 
 An arbitrary tone generation plugin for cordova apps.
 
 It generates raw tones at specific frequencies and amplitudes, this can be used to produce an interactive pitch response to various user actions, or to generate an electrical waveform through the headphone output jack to drive low-power AC electrical motors.
 
-See [this page](https://github.com/sdesalas/cordova-magnetometer-app/blob/master/www/index.html) for a basic sample cordova app using this plugin. 
+See [this page](https://github.com/CatabeeScienceAndDesign/FlexVolt) for an example app using this plugin.
 
 Installation
 ------------
 
-<code> cordova plugin add https://github.com/sdesalas/cordova-plugin-tonegenerator </code>
+<code> cordova plugin add https://github.com/CatabeeScienceAndDesign/cordova-plugin-tonegenerator </code>
 
 
 Methods
@@ -23,7 +26,7 @@ Methods
 cordova.plugins.tonegenerator.play()
 -------------------------------------------
 
-Starts playing a tone. 
+Starts playing a tone.
 
 <pre>
 <code>
@@ -31,7 +34,7 @@ Starts playing a tone.
 </code>
 </pre>
 
-Default values as follows: 
+Default values as follows:
 
 - volume: 127 (50%, max is 255)
 - waveType: 0 (Sine Wave)
@@ -81,5 +84,4 @@ Supported Platforms
 -------------------
 
 - iOS (TODO)
-- Android 
-
+- Android
