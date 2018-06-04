@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-tonegenerator.main", function(require, exports, module) {
 var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec'),
@@ -32,3 +33,5 @@ ToneGenerator.prototype = {
 };
 
 module.exports = new ToneGenerator();
+
+});
