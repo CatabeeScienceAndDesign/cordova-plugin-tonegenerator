@@ -22,8 +22,8 @@ ToneGenerator.prototype = {
     return cordova.exec(function() {}, function() {throw "Error updating tone"}, "ToneGenerator", "frequency", [hz || 0]);
   },
   volume: function(vol) {
-    if (volume > 255) volume = 255;
-    if (volume < 0) volume = 0;
+    if (vol > 255) vol = 255;
+    if (vol < 0) vol = 0;
     return cordova.exec(function() {}, function() {throw "Error updating tone"}, "ToneGenerator", "volume", [vol || 0]);
   },
   stop: function() {
