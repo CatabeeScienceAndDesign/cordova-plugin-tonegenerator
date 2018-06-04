@@ -81,9 +81,11 @@ public class ToneGenerator extends CordovaPlugin  {
         } 
         else if (action.equals("frequency")) {
             this.frequency = args.getInt(0);
+            Log.d(TAG, "Set Frequency: " + frequency);
         }
         else if (action.equals("volume")) {
             this.volume = args.getInt(0);
+            Log.d(TAG, "Set Volume: " + this.volume);
         } else {
             // Unsupported action
             return false;
@@ -111,6 +113,8 @@ public class ToneGenerator extends CordovaPlugin  {
                     int buffsize = AudioTrack.getMinBufferSize(sampleRate,
                             AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_16BIT);
+                    buffsize /= 4; // shorter buffer means slower change lag
+
                     // create an audiotrack object
                     Log.d(TAG, "Buffer Size: " + Integer.toString(buffsize));
                     AudioAttributes attributes = new AudioAttributes.Builder()
@@ -132,17 +136,24 @@ public class ToneGenerator extends CordovaPlugin  {
                     short samples[] = new short[buffsize];
                     double twopi = 8. * Math.atan(1.);
                     double ph = 0.0;
+
                     // start audio
+                    Log.d(TAG, "Play");
                     audioTrack.play();
 
+                    int amp = volume * 128;
+                    Log.d(TAG, "Amplitude: " + amp);
+                    double fr = frequency * 1.0;
+                    Log.d(TAG, "Frequency: " + frequency);
+
                     while (isRunning) {
-                        int amp = volume * 128;
-                        double fr = frequency * 1.0;
+                        amp = volume * 128;
+                        fr = frequency * 1.0;
                         for (int i = 0; i < buffsize; i++) {
                             samples[i] = (short) (amp * Math.sin(ph));
                             ph += twopi * fr / sampleRate;
                         }
-                        audioTrack.write(samples, 0, buffsize);
+                        audioTrack.write(samples, 0, samples.length);
                     }
                     audioTrack.stop();
                     audioTrack.release();
@@ -164,6 +175,7 @@ public class ToneGenerator extends CordovaPlugin  {
      * Stop tone.
      */
     public void stop() {
+        Log.d(TAG, "Stop");
         isRunning = false;
         try {
             t.join();
