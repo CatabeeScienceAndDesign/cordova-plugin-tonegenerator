@@ -1,4 +1,3 @@
-cordova.define("cordova-plugin-tonegenerator.main", function(require, exports, module) {
 /*
  *
  * The MIT License (MIT)
@@ -141,5 +140,3 @@ cordova.define("cordova-plugin-tonegenerator.main", function(require, exports, m
  };
 
  module.exports = new ToneGenerator();
-
-});
