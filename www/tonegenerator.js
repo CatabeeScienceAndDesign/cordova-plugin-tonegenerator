@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-tonegenerator.main", function(require, exports, module) {
 /*
  *
  * The MIT License (MIT)
@@ -25,37 +26,120 @@
  *
  */
 
-var argscheck = require('cordova/argscheck'),
-    utils = require('cordova/utils'),
-    exec = require('cordova/exec'),
-    timers = {};
+ var argscheck = require('cordova/argscheck'),
+     utils = require('cordova/utils'),
+     exec = require('cordova/exec'),
+     timers = {};
+ var DEFAULT_FREQUENCY = 440;
+ var DEFAULT_VOLUME = 50;
+ var MAX_VOLUME = 255;
+ var MIN_VOLUME = 0;
+ var MAX_FREQUENCY = 16000;
+ var MIN_FREQUENCY = 140;
+ var MAX_CHANNELS = 8;
 
-var ToneGenerator = function(){};
+ var ToneGenerator = function(){};
 
-ToneGenerator.prototype = {
-  play: function(frequency, volume, waveType) {
-    frequency = frequency || 440;
-    volume = volume || 127;
-    if (volume > 255) volume = 255;
-    if (volume < 0) volume = 0;
-    waveType = waveType || 1;
-    return cordova.exec(function() {
-      console.log('Generating tone at ' + frequency + 'Hz..');
-    }, function() {
-      throw "Error generating tone!";
-    }, "ToneGenerator", "play", [frequency, volume, waveType]);
-  },
-  frequency: function(hz) {
-    return cordova.exec(function() {}, function() {throw "Error updating tone frequency";}, "ToneGenerator", "frequency", [hz || 0]);
-  },
-  volume: function(vol) {
-    if (vol > 255) vol = 255;
-    if (vol < 0) vol = 0;
-    return cordova.exec(function() {}, function() {throw "Error updating tone volume";}, "ToneGenerator", "volume", [vol || 0]);
-  },
-  stop: function() {
-    return cordova.exec(function() {}, function() {throw "Error stopping tone";}, "ToneGenerator", "stop", []);
-  }
-};
+ ToneGenerator.prototype = {
+   play: function(frequency, volume, waveType) {
+     frequency = frequency || 440;
+     volume = volume || 127;
+     if (volume > 255) volume = 255;
+     if (volume < 0) volume = 0;
+     waveType = waveType || 1;
+     return cordova.exec(function() {
+       console.log('Generating tone at ' + frequency + 'Hz..');
+     }, function() {
+       throw "Error generating tone!";
+     }, "ToneGenerator", "play", [frequency, volume, waveType]);
+   },
+   frequency: function(hz) {
+     return cordova.exec(function() {}, function() {throw "Error updating tone frequency";}, "ToneGenerator", "frequency", [hz || 0]);
+   },
+   volume: function(vol) {
+     if (vol > 255) vol = 255;
+     if (vol < 0) vol = 0;
+     return cordova.exec(function() {}, function() {throw "Error updating tone volume";}, "ToneGenerator", "volume", [vol || 0]);
+   },
+   stop: function() {
+     return cordova.exec(function() {}, function() {throw "Error stopping tone";}, "ToneGenerator", "stop", []);
+   },
+   startChannel: function(ch, freq, vol) {
+     if (ch === undefined || ch < 0) {ch = 0;}
+     if (ch >= MAX_CHANNELS) {ch = 0;}
+     if (vol === undefined) {vol = DEFAULT_VOLUME;}
+     if (vol <MIN_VOLUME) {vol = MIN_VOLUME;}
+     if (vol > MAX_VOLUME) vol = MAX_VOLUME;
+     if (freq === undefined) {freq = DEFAULT_FREQUENCY;}
+     if (freq <MIN_FREQUENCY) {freq = MIN_FREQUENCY;}
+     if (freq > MAX_FREQUENCY) freq = MAX_FREQUENCY;
+     return cordova.exec(
+       function() {},
+       function(){throw "Error starting channel";},
+       "ToneGenerator",
+       "startChannel",
+       [ch, freq, vol]
+     );
+   },
+   setVolumeForChannel: function(ch, vol) {
+     if (ch === undefined || ch < 0) {ch = 0;}
+     if (ch >= MAX_CHANNELS) {ch = 0;}
+     if (vol === undefined) {vol = DEFAULT_VOLUME;}
+     if (vol <MIN_VOLUME) {vol = MIN_VOLUME;}
+     if (vol > MAX_VOLUME) vol = MAX_VOLUME;
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting volume for channel";},
+       "ToneGenerator",
+       "setVolumeForChannel",
+       [ch, vol]
+     );
+   },
+   setFrequencyForChannel: function(ch, freq) {
+     if (ch === undefined || ch < 0) {ch = 0;}
+     if (ch >= MAX_CHANNELS) {ch = 0;}
+     if (freq === undefined) {freq = DEFAULT_FREQUENCY;}
+     if (freq <MIN_FREQUENCY) {freq = MIN_FREQUENCY;}
+     if (freq > MAX_FREQUENCY) freq = MAX_FREQUENCY;
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting frequency for channel";},
+       "ToneGenerator",
+       "setFrequencyForChannel",
+       [ch, freq]
+     );
+   },
+   stopChannel: function(ch) {
+     if (ch === undefined || ch < 0) {ch = 0;}
+     if (ch >= MAX_CHANNELS) {ch = 0;}
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting frequency for channel";},
+       "ToneGenerator",
+       "stopChannel",
+       [ch]
+     );
+   },
+   stopAllChannels: function() {
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting frequency for channel";},
+       "ToneGenerator",
+       "stopAllChannels",
+       []
+     );
+   },
+   setFadeTime: function(fadeTime) {
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting fadeTime to " + fadeTime;},
+       "ToneGenerator",
+       "setFadeTime",
+       [fadeTime]
+     );
+   }
+ };
 
-module.exports = new ToneGenerator();
+ module.exports = new ToneGenerator();
+
+});
