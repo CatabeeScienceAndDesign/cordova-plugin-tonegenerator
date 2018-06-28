@@ -329,7 +329,7 @@ public class ToneGenerator extends CordovaPlugin  {
         }
         if (allChannelsAreOff){
             // no channels left - clean up thread
-            Log.d(TAG, "Stopped the last channel - shutting down the thread.")
+            Log.d(TAG, "Stopped the last channel - shutting down the thread.");
             isRunning = false;
             try {
                 t.join();
