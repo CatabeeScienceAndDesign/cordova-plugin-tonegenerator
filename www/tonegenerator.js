@@ -35,7 +35,7 @@ cordova.define("cordova-plugin-tonegenerator.main", function(require, exports, m
  var MAX_VOLUME = 255;
  var MIN_VOLUME = 0;
  var MAX_FREQUENCY = 16000;
- var MIN_FREQUENCY = 140;
+ var MIN_FREQUENCY = 60;
  var MAX_CHANNELS = 8;
 
  var ToneGenerator = function(){};
