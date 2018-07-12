@@ -257,7 +257,7 @@ public class ToneGenerator extends CordovaPlugin  {
                                     } else if (channelStates[iCh] == STATE_VOLUME_RAMP) {
                                         // ramp volume changes to avoid pops
                                         newAmp = newVolumes[iCh] * 128;
-                                        ampOut = amp + (newAmp - amp) * (rampSamples - rampCount[iCh]) / rampSamples;
+                                        ampOut = amp + ((newAmp - amp) * rampCount[iCh] / rampSamples);
                                         samples[i] += (short) (ampOut * Math.sin(freq*ph));
                                         rampCount[iCh] ++;
                                         if (rampCount[iCh] >= rampSamples) {
