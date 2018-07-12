@@ -39,8 +39,15 @@ public class ToneGenerator extends CordovaPlugin  {
 
     // general fields
     private static final int SAMPLE_RATE = 8000;
+
+    private static final int DEFAULT_FREQUENCY = 440;
     private static final int START_VOLUME = 0;
-    private static final int START_FREQUENCY = 440;
+    private static final int DEFAULT_VOLUME = 50;
+    private static final int MAX_VOLUME = 255;
+    private static final int MIN_VOLUME = 0;
+    private static final int MAX_FREQUENCY = 16000;
+    private static final int MIN_FREQUENCY = 60;
+
     private static final int MAX_CHANNELS = 8;
 
     Thread t;
@@ -76,8 +83,9 @@ public class ToneGenerator extends CordovaPlugin  {
         for (int iCh = 0; iCh < MAX_CHANNELS; iCh++){
             channelStates[iCh] = STATE_OFF;
             volumes[iCh] = START_VOLUME;
-            frequencies[iCh] = START_FREQUENCY;
-            newFrequencies[iCh] = START_FREQUENCY;
+            newVolumes[iCh] = START_VOLUME;
+            frequencies[iCh] = DEFAULT_FREQUENCY;
+            newFrequencies[iCh] = DEFAULT_FREQUENCY;
         }
     }
 
@@ -101,8 +109,21 @@ public class ToneGenerator extends CordovaPlugin  {
 
         if (action.equals("startChannel")) {
             int ch = args.getInt(0);
-            this.frequencies[ch] = args.getInt(1);
-            this.volumes[ch] = args.getInt(2);
+            if (ch == null) {ch = 0;}
+            if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
+
+            int freq = args.getInt(1);
+            if (freq == null) {freq = DEFAULT_FREQUENCY;}
+            if (freq < MIN_FREQUENCY) { freq = MIN_FREQUENCY;}
+            if (freq > MAX_FREQUENCY) { freq = MAX_FREQUENCY;}
+            this.frequencies[ch] = freq;
+
+            int vol = args.getInt(2);
+            if (vol == null) {vol = DEFAULT_VOLUME;}
+            if (vol < MIN_VOLUME) { vol = MIN_VOLUME;}
+            if (vol > MAX_VOLUME) { vol = MAX_VOLUME;}
+            this.volumes[ch] = vol;
+
             Log.d(TAG, "Updated Freq: " + this.frequencies[ch] + " and Volume: " + this.volumes[ch]);
             if (!isRunning) {
                 Log.d(TAG, "Starting With Channel " + ch);
@@ -122,18 +143,31 @@ public class ToneGenerator extends CordovaPlugin  {
         }
         else if (action.equals("stopChannel")) {
             int ch = args.getInt(0);
+            if (ch == null) {ch = 0;}
+            if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
             this.stopChannel(ch);
         }
         else if (action.equals("setFrequencyForChannel")) {
             int ch = args.getInt(0);
+            if (ch == null) {ch = 0;}
+            if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
+
             int freq = args.getInt(1);
-            // TODO ensure within limits
+            if (freq == null) {freq = DEFAULT_FREQUENCY;}
+            if (freq < MIN_FREQUENCY) { freq = MIN_FREQUENCY;}
+            if (freq > MAX_FREQUENCY) { freq = MAX_FREQUENCY;}
             changeFrequencyForChannel(ch, freq);
         }
         else if (action.equals("setVolumeForChannel")) {
             int ch = args.getInt(0);
-            int volume = args.getInt(1);
-            changeVolumeForChannel(ch, volume);
+            if (ch == null) {ch = 0;}
+            if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
+
+            int vol = args.getInt(1);
+            if (vol == null) {vol = DEFAULT_VOLUME;}
+            if (vol < MIN_VOLUME) { vol = MIN_VOLUME;}
+            if (vol > MAX_VOLUME) { vol = MAX_VOLUME;}
+            changeVolumeForChannel(ch, vol);
         }
         else if (action.equals("setFadeTime")) {
             // takes int, milliseconds
@@ -296,19 +330,28 @@ public class ToneGenerator extends CordovaPlugin  {
     }
 
     private void changeFrequencyForChannel(int ch, int freq) {
-        // TODO ensure within limits
-        channelStates[ch] = STATE_CROSS_FADE;
-        fadeCount[ch] = 0;
-        newFrequencies[ch] = freq;
-        Log.d(TAG, "Changing Frequency from " + frequencies[ch] + " to " + newFrequencies[ch] + " for channel " + ch);
+        if (channelStates[ch] != STATE_OFF) {
+            channelStates[ch] = STATE_CROSS_FADE;
+            fadeCount[ch] = 0;
+            newFrequencies[ch] = freq;
+            Log.d(TAG, "Changing Frequency from " + frequencies[ch] + " to " + newFrequencies[ch] + " for channel " + ch);
+        } else {
+            // channel is off.  just change the value, don't start a fade
+            frequencies[ch] = freq;
+        }
+
     }
 
     private void changeVolumeForChannel(int ch, int volume) {
-        // TODO ensure within limits
-        channelStates[ch] = STATE_VOLUME_RAMP;
-        rampCount[ch] = 0;
-        newVolumes[ch] = volume;
-        Log.d(TAG, "Ramping from Volume: " + volumes[ch]  + " to Volume: " + newVolumes[ch] + " for channel " + ch);
+        if (channelStates[ch] != STATE_OFF) {
+            channelStates[ch] = STATE_VOLUME_RAMP;
+            rampCount[ch] = 0;
+            newVolumes[ch] = volume;
+            Log.d(TAG, "Ramping from Volume: " + volumes[ch]  + " to Volume: " + newVolumes[ch] + " for channel " + ch);
+        } else {
+            // channel is off.  just change the value, don't start a ramp
+            volumes[ch] = volume;
+        }
     }
 
     /**

@@ -40,28 +40,54 @@
  var ToneGenerator = function(){};
 
  ToneGenerator.prototype = {
-   play: function(frequency, volume, waveType) {
+   play: function(frequency, volume) {
      frequency = frequency || 440;
      volume = volume || 127;
      if (volume > 255) volume = 255;
      if (volume < 0) volume = 0;
-     waveType = waveType || 1;
-     return cordova.exec(function() {
-       console.log('Generating tone at ' + frequency + 'Hz..');
-     }, function() {
-       throw "Error generating tone!";
-     }, "ToneGenerator", "play", [frequency, volume, waveType]);
+     return cordova.exec(
+       function() {
+         console.log('Generating tone at ' + frequency + 'Hz..');
+       }, function() {
+         throw "Error generating tone!";
+       },
+       "ToneGenerator",
+       "startChannel",
+       [0, frequency, volume]
+     );
    },
-   frequency: function(hz) {
-     return cordova.exec(function() {}, function() {throw "Error updating tone frequency";}, "ToneGenerator", "frequency", [hz || 0]);
+   frequency: function(freq) {
+     if (freq === undefined) {freq = DEFAULT_FREQUENCY;}
+     if (freq <MIN_FREQUENCY) {freq = MIN_FREQUENCY;}
+     if (freq > MAX_FREQUENCY) freq = MAX_FREQUENCY;
+     return cordova.exec(
+       function() {},
+       function() {throw "Error updating tone frequency";},
+       "ToneGenerator",
+       "setFrequencyForChannel",
+       [0, freq]
+     );
    },
    volume: function(vol) {
-     if (vol > 255) vol = 255;
-     if (vol < 0) vol = 0;
-     return cordova.exec(function() {}, function() {throw "Error updating tone volume";}, "ToneGenerator", "volume", [vol || 0]);
+     if (vol === undefined) {vol = DEFAULT_VOLUME;}
+     if (vol <MIN_VOLUME) {vol = MIN_VOLUME;}
+     if (vol > MAX_VOLUME) vol = MAX_VOLUME;
+     return cordova.exec(
+       function() {},
+       function() {throw "Error updating tone volume";},
+       "ToneGenerator",
+       "setVolumeForChannel",
+       [0, vol]
+     );
    },
    stop: function() {
-     return cordova.exec(function() {}, function() {throw "Error stopping tone";}, "ToneGenerator", "stop", []);
+     return cordova.exec(
+       function() {},
+       function() {throw "Error stopping tone";},
+       "ToneGenerator",
+       "stop",
+       []
+     );
    },
    startChannel: function(ch, freq, vol) {
      if (ch === undefined || ch < 0) {ch = 0;}
