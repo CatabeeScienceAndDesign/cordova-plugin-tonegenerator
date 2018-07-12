@@ -109,17 +109,14 @@ public class ToneGenerator extends CordovaPlugin  {
 
         if (action.equals("startChannel")) {
             int ch = args.getInt(0);
-            if (ch == null) {ch = 0;}
             if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
 
             int freq = args.getInt(1);
-            if (freq == null) {freq = DEFAULT_FREQUENCY;}
             if (freq < MIN_FREQUENCY) { freq = MIN_FREQUENCY;}
             if (freq > MAX_FREQUENCY) { freq = MAX_FREQUENCY;}
             this.frequencies[ch] = freq;
 
             int vol = args.getInt(2);
-            if (vol == null) {vol = DEFAULT_VOLUME;}
             if (vol < MIN_VOLUME) { vol = MIN_VOLUME;}
             if (vol > MAX_VOLUME) { vol = MAX_VOLUME;}
             this.volumes[ch] = vol;
@@ -143,28 +140,23 @@ public class ToneGenerator extends CordovaPlugin  {
         }
         else if (action.equals("stopChannel")) {
             int ch = args.getInt(0);
-            if (ch == null) {ch = 0;}
             if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
             this.stopChannel(ch);
         }
         else if (action.equals("setFrequencyForChannel")) {
             int ch = args.getInt(0);
-            if (ch == null) {ch = 0;}
             if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
 
             int freq = args.getInt(1);
-            if (freq == null) {freq = DEFAULT_FREQUENCY;}
             if (freq < MIN_FREQUENCY) { freq = MIN_FREQUENCY;}
             if (freq > MAX_FREQUENCY) { freq = MAX_FREQUENCY;}
             changeFrequencyForChannel(ch, freq);
         }
         else if (action.equals("setVolumeForChannel")) {
             int ch = args.getInt(0);
-            if (ch == null) {ch = 0;}
             if (ch < 0 || ch > MAX_CHANNELS) { ch = 0;}
 
             int vol = args.getInt(1);
-            if (vol == null) {vol = DEFAULT_VOLUME;}
             if (vol < MIN_VOLUME) { vol = MIN_VOLUME;}
             if (vol > MAX_VOLUME) { vol = MAX_VOLUME;}
             changeVolumeForChannel(ch, vol);
