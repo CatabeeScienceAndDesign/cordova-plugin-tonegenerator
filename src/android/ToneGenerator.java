@@ -47,21 +47,29 @@ public class ToneGenerator extends CordovaPlugin  {
     private static boolean isRunning = false;
 
     private static int[] volumes = new int[MAX_CHANNELS];
+    private static int[] newVolumes = new int[MAX_CHANNELS];
     private static int[] frequencies = new int[MAX_CHANNELS];
     private static int[] newFrequencies = new int[MAX_CHANNELS];
 
     private static final int STATE_OFF = 0;
     private static final int STATE_FADE_IN = 1;
     private static final int STATE_CROSS_FADE = 2;
-    private static final int STATE_PLAY = 3;
-    private static final int STATE_FADE_OUT = 4;
+    private static final int STATE_VOLUME_RAMP = 3;
+    private static final int STATE_PLAY = 4;
+    private static final int STATE_FADE_OUT = 5;
     private static int[] channelStates = new int[MAX_CHANNELS];
 
     // fade management - have to fade new tones in, and crossfade frequency changes
     private static int[] fadeCount = new int[MAX_CHANNELS];
-    private static int fadeSamples = 4000;  // 5 ms
-    private static final int FADE_TIME_MAX = 10000;
+    private static int fadeSamples = SAMPLE_RATE / 20; // 400;  // 50 ms
+    private static final int FADE_TIME_MAX = 10000; // 10 seconds
     private static final int FADE_TIME_MIN = 0;
+
+    // ramp management - have to ramp volume changes to avoid pops
+    private static int[] rampCount = new int[MAX_CHANNELS];
+    private static int rampSamples = SAMPLE_RATE / 20; // 400;  // 50 ms
+    private static final int RAMP_TIME_MAX = 10000; // 10 seconds
+    private static final int RAMP_TIME_MIN = 0;
 
     public ToneGenerator() {
         // initialize arrays
@@ -136,6 +144,15 @@ public class ToneGenerator extends CordovaPlugin  {
             fadeSamples = tmp * SAMPLE_RATE / 1000;
             Log.d(TAG, "Changed fade samples to " + fadeSamples);
         }
+        else if (action.equals("setRampTime")) {
+            // takes int, milliseconds
+            int tmp = args.getInt(0);
+            if (tmp > RAMP_TIME_MAX) tmp = RAMP_TIME_MAX;
+            if (tmp < RAMP_TIME_MIN) tmp = RAMP_TIME_MIN;
+            Log.d(TAG, "Changing ramp time to " + tmp);
+            rampSamples = tmp * SAMPLE_RATE / 1000;
+            Log.d(TAG, "Changed ramp samples to " + rampSamples);
+        }
         else {
             // Unsupported action
             return false;
@@ -186,7 +203,7 @@ public class ToneGenerator extends CordovaPlugin  {
                     Log.d(TAG, "Starting multichannel");
                     audioTrack.play();
 
-                    int amp, ampIn, ampOut;
+                    int amp, newAmp, ampIn, ampOut;
                     double newFreq = 0.0, freq = 0.0;
 
                     while (isRunning) {
@@ -232,10 +249,22 @@ public class ToneGenerator extends CordovaPlugin  {
                                         samples[i] += (short) (ampOut * Math.sin(freq*ph) + ampIn * Math.sin(newFreq*ph));
                                         fadeCount[iCh] ++;
                                         if (fadeCount[iCh] >= fadeSamples) {
-                                            Log.d(TAG, "Cross Fade Complete");
+                                            Log.d(TAG, "Pitch Cross Fade Complete For Channel " + iCh);
                                             channelStates[iCh] = STATE_PLAY;
                                             frequencies[iCh] = newFrequencies[iCh];
                                             freq = frequencies[iCh] * 1.0;
+                                        }
+                                    } else if (channelStates[iCh] == STATE_VOLUME_RAMP) {
+                                        // ramp volume changes to avoid pops
+                                        newAmp = newVolumes[iCh] * 128;
+                                        ampOut = amp + (newAmp - amp) * (rampSamples - rampCount[iCh]) / rampSamples;
+                                        samples[i] += (short) (ampOut * Math.sin(freq*ph));
+                                        rampCount[iCh] ++;
+                                        if (rampCount[iCh] >= rampSamples) {
+                                            Log.d(TAG, "Volume Ramp Complete For Channel" + iCh);
+                                            channelStates[iCh] = STATE_PLAY;
+                                            volumes[iCh] = newVolumes[iCh];
+                                            amp = volumes[iCh] * 128;
                                         }
                                     } else if (channelStates[iCh] == STATE_PLAY){
                                         // no fading, just generate the signal
@@ -271,14 +300,15 @@ public class ToneGenerator extends CordovaPlugin  {
         channelStates[ch] = STATE_CROSS_FADE;
         fadeCount[ch] = 0;
         newFrequencies[ch] = freq;
-        //this.frequencies[ch] = fr;  // not yet - need to fade it in
         Log.d(TAG, "Changing Frequency from " + frequencies[ch] + " to " + newFrequencies[ch] + " for channel " + ch);
     }
 
     private void changeVolumeForChannel(int ch, int volume) {
         // TODO ensure within limits
-        volumes[ch] = volume;
-        Log.d(TAG, "Set Volume: " + volumes[ch]  + " for channel " + ch);
+        channelStates[ch] = STATE_VOLUME_RAMP;
+        rampCount[ch] = 0;
+        newVolumes[ch] = volume;
+        Log.d(TAG, "Ramping from Volume: " + volumes[ch]  + " to Volume: " + newVolumes[ch] + " for channel " + ch);
     }
 
     /**

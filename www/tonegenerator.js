@@ -136,6 +136,15 @@
        "setFadeTime",
        [fadeTime]
      );
+   },
+   setRampTime: function(rampTime) {
+     return cordova.exec(
+       function() {},
+       function(){throw "Error setting rampTime to " + rampTime;},
+       "ToneGenerator",
+       "setRampTime",
+       [rampTime]
+     );
    }
  };
 
